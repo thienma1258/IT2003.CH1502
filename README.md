@@ -1,4 +1,4 @@
-# CS2205.CH1501
+# IT2003.CH1502	
 
 > Môn học:  Công nghệ mạng và truyền thông hiện đại	
 > Giảng viên: PGS Lê Trung Quân	
