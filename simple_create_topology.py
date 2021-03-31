@@ -1,4 +1,6 @@
 from mininet.topo import Topo
+import logging
+
 
 class MyTopo( Topo ):
     "Simple topology example."
@@ -19,3 +21,4 @@ class MyTopo( Topo ):
 
 
 topos = { 'mytopo': ( lambda: MyTopo() ) }
+logging.info("Create simple topology h1 -> s3 ->s4 ->h2 try test h1 -> s2")
