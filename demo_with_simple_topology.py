@@ -1,5 +1,7 @@
 from core.network_env import TestNetEnvironment
 from core.utils import *
+from simple_topo import TinyTopo
+from core.dijkstra import get_routing_decision #import dijkstra algorthim for routing to update  flows table can use with different algorthim different factor
 import sys
 
 # env = TestNetEnvironment()
@@ -24,16 +26,12 @@ def __run__(argc, *argv):
     # MARK: - Select Network Topology
     # 1. Create environment for creating, running, and testing
     #    network simulations from presets
-    env = TestNetEnvironment()
+    env = TestNetEnvironment(TinyTopo)
     display.section("Cleaning up...")
     env.clean()
-    # 2. Ask to input the index of a topology preset
-    display.section("Select Network Topology")
-    index = env.getNetworkTopologyIndex(argv)
-    # 3. Select the preset with that index
-    selectedTopoPreset = env.presetTopologies.select(index)
-    display.message('Selected %s (index: %s)' %
-                    (selectedTopoPreset.displayName, index))
+    selectedTopoPreset = env.presetTopologies
+    display.message('choose topology %s ' %
+                    (selectedTopoPreset.displayName))
 
     # MARK: - Begin Network Simulation and do the First Test
     # 4. Initialize a new network with selected topology
@@ -46,6 +44,7 @@ def __run__(argc, *argv):
                    ' (E.g., track packets with \'sudo wireshark &\', \'tcpdump\', etc.)\n' +
                    ' When you are ready to start the simulation tests, type \'exit\' or press CTRL-D.\n')
     env.startCLI()
+
     # 6. Test 1: Destination Host Unreachable
     display.section("Running tests...")
     (host1, host2) = env.getTestHosts()
@@ -55,43 +54,62 @@ def __run__(argc, *argv):
         display.section("Test 1: Hosts are unreachable...")
         display.highlight(test1)
     __wait__(do_test_1)
+    # 7. Get the switches and link weights
+    switches = env.net.topo.switches()
+    linkWeights = env.net.topo._slinks
+    # 8. Run dijkstra algorthim update flow table 
+    env.updateRoutes( get_routing_decision, switches, linkWeights )
+    env.startCLI()
 
-    # #MARK: - Compute the Paths, Create Flow Tables, and do the Second Test
-    # # 7. Get the switches and link weights
-    # switches = env.net.topo.switches()
-    # linkWeights = env.net.topo._slinks
-    # # 8. Run LS Routing algorithm # 9. Add flow table entries
-    # env.updateRoutes( get_routing_decision, switches, linkWeights )
+    def do_test_2():
+    # 10. Test 2: Established connectivity
+    	display.section("Test 2: Hosts are now connected...")
+    	test2 = env.nodeReachability( host1, host2 )
+    	display.highlight(test2)
+    __wait__(do_test_2)
+    env.startCLI()
 
-    # def do_test_2():
-    # # 10. Test 2: Established connectivity
-    # 	display.section("Test 2: Hosts are now connected...")
-    # 	test2 = env.nodeReachability( host1, host2 )
-    # 	display.highlight(test2)
-    # __wait__(do_test_2)
+    #MARK: - Disable one of the Links and do the Third Test
+    # 11. Disable a link
+    link = env.net.topo.problemLink
+    display.section("Changing network conditions")
+    display.message('Problem link in this simulation is {%s, %s}' % link )
+    env.simulateLinkProblem(link)
+    n1 = int( link[0][1:] )
+    n2 = int( link[1][1:] )
+    for (prev1, prev2, w) in linkWeights:
+    	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
+    		linkWeights.remove( (prev1, prev2, w) )
+    		break
+    # 12. Test 3: Hosts
+    def do_test_3():
+    	display.section("Test 3: Link failure affects optimal routes...")
+    	test3 = env.nodeReachability( host1, host2 )
+    	display.highlight(test3)
+    __wait__(do_test_3)
 
-    # #MARK: - Disable one of the Links and do the Third Test
-    # # 11. Disable a link
-    # link = env.net.topo.problemLink
-    # display.section("Changing network conditions")
-    # display.message('Problem link in this simulation is {%s, %s}' % link )
-    # env.simulateLinkProblem(link)
-    # n1 = int( link[0][1:] )
-    # n2 = int( link[1][1:] )
-    # for (prev1, prev2, w) in linkWeights:
-    # 	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
-    # 		linkWeights.remove( (prev1, prev2, w) )
-    # 		linkWeights.append( (str(n1), str(n2), 1000) )
-    # 		print('Increasing the cost of link %s to 1000: %s' % ([(prev1, prev2, w)], [(n1, n2, 1000)]) )
-    # 		break
-    # # 12. Test 3: Hosts
-    # def do_test_3():
-    # 	display.section("Test 3: Link failure affects optimal routes...")
-    # 	test3 = env.nodeReachability( host1, host2 )
-    # 	display.highlight(test3)
-    # __wait__(do_test_3)
+   #MARK: - Disable one of the Links and do the Third Test
+    # 11. Disable a link
+    link = env.net.topo.problemLink
+    display.section("Changing network conditions")
+    display.message('Problem link in this simulation is {%s, %s}' % link )
+    env.simulateLinkProblem(link)
+    n1 = int( link[0][1:] )
+    n2 = int( link[1][1:] )
+    for (prev1, prev2, w) in linkWeights:
+    	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
+    		linkWeights.remove( (prev1, prev2, w) )
+    		break
+    # 12. Test 3: Hosts
+    def do_test_3():
+    	display.section("Test 3: Link failure affects optimal routes...")
+    	test3 = env.nodeReachability( host1, host2 )
+    	display.highlight(test3)
+    __wait__(do_test_3)
 
+    
     # #MARK: - Recompute the Least-Cost Paths and do the Fourth Test
+    # when cost or weight of each switch is increase 
     # # 13.
     # env.updateRoutes( get_routing_decision, switches, linkWeights )
     # # 14. Test 4:
@@ -109,7 +127,7 @@ def __run__(argc, *argv):
     # for c in customList:
     # 	print ('%s   ' % c),
     # print('')
-    env.startCLI()
+    # env.startCLI()
 
     # MARK: - Stop Network Simulation
     # 15. Stop network

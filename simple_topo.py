@@ -1,5 +1,4 @@
-from core.module import *
-
+from core.topology import *
 
 #MARK: - Tiny Preset
 # Tiny Topology (Example Network 1)
