@@ -20,6 +20,6 @@ Các host ảo, switch, liên kết và các controller trên mininet là các t
 ## Diagram
 
 Chay trên mạng vừa gồm (4 switch 4 host 1 controller):
-![alt text](https://github.com/thienma1258/[reponame]/blob/IT2003.CH1502/present-diagram.png?raw=true)
+![alt text](https://github.com/thienma1258/IT2003.CH1502/blob/main/present-diagram.png?raw=true)
 
 
