@@ -1,0 +1,65 @@
+DEMO : IT2003.CH1502
+TÊN :Phạm Ngọc Đông(CH2002005)
+
+Chuẩn bị :
+Môi trường
+OS :Ubuntu 16.06 chạy mininet
+Mininet:là một công cụ giả lập mạng, bao gồm tập hợp các hosts đầu cuối, 
+các switches, routers và các liên kết trên một Linux kernel. 
+Python ENV. 
+
+
+Demo 
+Sử dụng SDN lập trình dùng thuật toán dijkstra để tối ưu cho routing giữa các switch 
+sao cho ít tốn chi phi nhất.
+
+Dùng mininet tạo mạng topo đơn giản bao gồm (4 switch 4 host 1 controller):
+
+Test 1:
+Thử ping từ h1 đến h2
+
+Kết quả : h1 không thế kết nối được h2 vì flows table của SDN controller chưa được tính toán.
+Ta xem wireshark thấy được h1 send 3 ARP packaets để tìm h2 nhưng ko thấy reply
+
+
+Test 2:
+
+> {s1, s2}      6
+> {s1, s3}      1
+> {s1, s4}      2
+> {s2, s4}      3
+> {s3, s4}      3
+> {s3, s2}      5
+
+Dùng thuật toán dijkstra tính toán routing ngắn nhất giữa các switch
+kết quả :h1 -> s1 -> s4 -> s2 -> h2 cost là 5 
+
+
+Test 3:
+
+> {s1, s2}      6
+> {s1, s3}      1
+> {s1, s4}      2
+> {s2, s4}      3
+> {s3, s4}      3
+> {s3, s2}      5
+
+nếu connection giữa s4 đến s2 bi drop thì tính toán lại routing giữa các switch
+kết quả : h1-> s1 -> s2 -> h2  cost là 6
+
+
+
+Test 4:
+
+
+> {s1, s3}      1
+> {s1, s4}      2
+> {s3, s4}      3
+> {s3, s2}      5
+> {s1, s2}      100
+
+Tăng chi phí từ s1 -> s2 lên thành 100 ta sẽ tính toán lại routing
+kết quả : h1 -> s1 -> s3 -> s2 -> h2 cost là 6
+
+
+

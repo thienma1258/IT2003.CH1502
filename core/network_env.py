@@ -148,34 +148,11 @@ class TestNetEnvironment:
 	def nodeReachability( self, n1, n2 ):
 		return ( ping(n1, n2), ping(n2, n1) )
 	
-	# # Get the index
-	# def getNetworkTopologyIndex( self, argv ):
-	# 	(min, max) = self.presetTopologies.range()
-	# 	default = self.presetTopologies.defaultIndex
-	# 	index = default
-	# 	if ( parser.validate(argv) ):
-	# 		# If arguments are valid, get the index
-	# 		index = parser.getIndex( argv )
-	# 	else:
-	# 		# If network was not chosen on script start,
-	# 		#   show the list of preset networks, and
-	# 		#   ask to choose one.
-	# 		display.networkSelectionMenu( self.presetTopologies )
-	# 		display.prompt('Input the index (%s to %s) of a network you want to test: ' % (min, max))
-	# 		index = parser.waitForInput()
-	# 		# If input is invalid, then choose the first
-	# 		#   network in the list (starts at index 1).
-	# 		if not ( inRange(index, (min, max)) ) :
-	# 			display.error('Index %s is out of range. Resetting index to default.' % (index))
-	# 			index = default
-	# 	return index
-		
-	
 	# Disable the link between node1 and node2
 	def simulateLinkProblem( self, link ):
 		(name1, name2) = link
 		(node1, node2) = self.getNodes( name1, name2 )
 		link = self.net.link(node1, node2)#[0] 
 		link.stop()
-		log.infoln('Link between nodes %s and %s has been disabled' % (link))
+		log.infoln('Link between nodes %s and %s has been disabled' % (node1,node2))
 		return link

@@ -78,7 +78,8 @@ class SuperTopo( Topo ):
 class LinkTopo( SuperTopo ):
 	displayName = '< Link >'
 	info = '< BaseClass >'
-	problemLink = ('s1', 's2')
+	problemLink = ('s2', 's4')
+	increaseCostLink = ('s1', 's2')
 	
 	def build( self, n, k, _wlinks, *_args, **_kwargs ):
 		#MARK: Switches

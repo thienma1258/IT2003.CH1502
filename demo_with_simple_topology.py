@@ -75,29 +75,33 @@ def __run__(argc, *argv):
     display.section("Changing network conditions")
     display.message('Problem link in this simulation is {%s, %s}' % link )
     env.simulateLinkProblem(link)
-    n1 = int( link[0][1:] )
-    n2 = int( link[1][1:] )
+    n2 = int( link[0][1:] )
+    n4 = int( link[1][1:] )
     for (prev1, prev2, w) in linkWeights:
-    	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
+    	if ((prev1 == n2 and prev2 == n4) or (prev1 == n4 and prev2 == n2)):
     		linkWeights.remove( (prev1, prev2, w) )
     		break
-    # 12. Test 3: Hosts
+
+
+    env.updateRoutes( get_routing_decision, switches, linkWeights )
+
     def do_test_3():
-    	display.section("Test 3: Link failure affects optimal routes...")
+    	display.section("Test 3: Link recompute after link from s4->s2 is fail.")
     	test3 = env.nodeReachability( host1, host2 )
     	display.highlight(test3)
     __wait__(do_test_3)
 
+    env.startCLI()
    #MARK: - Disable one of the Links and do the Third Test
     # 11. Disable a link
     link = env.net.topo.problemLink
     display.section("Changing network conditions")
     display.message('Problem link in this simulation is {%s, %s}' % link )
     env.simulateLinkProblem(link)
-    n1 = int( link[0][1:] )
-    n2 = int( link[1][1:] )
+    n2 = int( link[0][1:] )
+    n4 = int( link[1][1:] )
     for (prev1, prev2, w) in linkWeights:
-    	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
+    	if ((prev1 == n2 and prev2 == n4) or (prev1 == n4 and prev2 == n4)):
     		linkWeights.remove( (prev1, prev2, w) )
     		break
     # 12. Test 3: Hosts
@@ -107,27 +111,30 @@ def __run__(argc, *argv):
     	display.highlight(test3)
     __wait__(do_test_3)
 
-    
-    # #MARK: - Recompute the Least-Cost Paths and do the Fourth Test
-    # when cost or weight of each switch is increase 
-    # # 13.
-    # env.updateRoutes( get_routing_decision, switches, linkWeights )
-    # # 14. Test 4:
-    # def do_test_4():
-    # 	display.section("Test 4: Hosts can communicate again...")
-    # 	test4 = env.nodeReachability(host1, host2)
-    # 	display.highlight(test4)
-    # __wait__(do_test_4)
+    link2 = env.net.topo.increaseCostLink
+    n1 = int( link2[0][1:] )
+    n2 = int( link2[1][1:] )
+    for (prev1, prev2, w) in linkWeights:
+    	if ((prev1 == n1 and prev2 == n2) or (prev1 == n2 and prev2 == n1)):
+    		linkWeights.remove( (prev1, prev2, w) )
+    		break
 
-    # #MARK: - Command Line Interface
-    # # 15. Start the CLI to run other tests
-    # display.section("Starting Command Line Interface")
-    # print('Custom debugging commands:')
-    # customList = colorizeEach(['stats', 'flows', 'paths', 'routes', 'costs', 'weights', 'all'], UITextStyle.Color.magenta)
-    # for c in customList:
-    # 	print ('%s   ' % c),
-    # print('')
-    # env.startCLI()
+    linkWeights.append( (str(n1), str(n2), 100) )
+    #MARK: - Recompute the Least-Cost Paths and do the Fourth Test
+    # when cost or weight of each switch is increase  between node 2 and node 4 is 100
+    # 13.
+    env.updateRoutes( get_routing_decision, switches, linkWeights )
+    # 14. Test 4:
+    def do_test_4():
+    	display.section("Test 4: routing from h1 to h2 change afte increase s2->s4 :100 ")
+    	test4 = env.nodeReachability(host1, host2)
+    	display.highlight(test4)
+    __wait__(do_test_4)
+
+    #MARK: - Command Line Interface
+    # 15. Start the CLI to run other tests
+    display.section("Starting Command Line Interface")
+    env.startCLI()
 
     # MARK: - Stop Network Simulation
     # 15. Stop network
