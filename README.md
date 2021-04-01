@@ -17,7 +17,9 @@ Các host ảo, switch, liên kết và các controller trên mininet là các t
 ## Overview
 * Tên:Phạm Ngọc Đông, K.15, Ngành CNTT (CH2002004)
 * Project nhầm demo mô phỏng SDN và thay đổi routing cho controller sử dụng thuật toán Dijkstra's để switch chạy tốn ít chi phí và nhanh nhất.
-## Kết qua
+## Diagram
 
-Chay trên mạng vừa và nhỏ
+Chay trên mạng vừa gồm (4 switch 4 host 1 controller):
+![alt text](https://github.com/thienma1258/[reponame]/blob/IT2003.CH1502/present-diagram.png?raw=true)
+
 
