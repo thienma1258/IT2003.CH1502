@@ -2,18 +2,24 @@ from mininet.clean import cleanup
 from mininet.util import irange
 
 from log import log
-from cli import (  TestNetEnvCLI )
+from cli import (  DongPhamTestCli )
 from net_launcher import (TestNetLauncher)
 from utils import (  TestNetSelectionGroup,
 							  parser, display )
 
+# Ping a node from another node
+def ping( n1, n2, c = 1 ):
+	_command = 'ping %s -c%s' % ( n2.IP(), c )
+	return ( _command, n1.cmd(_command) )
+
+	
 # OpenFlow flow tables
 # Provides interface to start networks, control,
 #   and test simulated networks
 class TestNetEnvironment:
-	def __init__( self ):
+	def __init__( self,topology ):
 		self.launcher = TestNetLauncher()
-		# self.presetTopologies = defaultPresetGroup()
+		self.presetTopologies = topology
 	
 	# Remove previous mininet data
 	def clean( self ):
@@ -34,7 +40,7 @@ class TestNetEnvironment:
 			# Compute the least cost route for each destination
 			for route in routes:
 				# Least cost paths to destinations
-				dstSwitch = last(route)
+				dstSwitch = route[-1] #last(route)
 				dstHost = 'h%s' % dstSwitch[1:]
 				dstAddress = self.IP(dstHost)
 				## Switches to the connected host flows
@@ -95,8 +101,10 @@ class TestNetEnvironment:
 	
 	# Interact
 	def startCLI( self ):
-		self.CLI = TestNetEnvCLI( self.net, self )
+		self.CLI = DongPhamTestCli( self.net, self )
 	
+	def getCLI(self):
+		return self.CLI 
 	
 	
 	# OpenFlow
@@ -140,33 +148,34 @@ class TestNetEnvironment:
 	def nodeReachability( self, n1, n2 ):
 		return ( ping(n1, n2), ping(n2, n1) )
 	
-	# Get the index
-	def getNetworkTopologyIndex( self, argv ):
-		(min, max) = self.presetTopologies.range()
-		default = self.presetTopologies.defaultIndex
-		index = default
-		if ( parser.validate(argv) ):
-			# If arguments are valid, get the index
-			index = parser.getIndex( argv )
-		else:
-			# If network was not chosen on script start,
-			#   show the list of preset networks, and
-			#   ask to choose one.
-			display.networkSelectionMenu( self.presetTopologies )
-			display.prompt('Input the index (%s to %s) of a network you want to test: ' % (min, max))
-			index = parser.waitForInput()
-			# If input is invalid, then choose the first
-			#   network in the list (starts at index 1).
-			if not ( inRange(index, (min, max)) ) :
-				display.error('Index %s is out of range. Resetting index to default.' % (index))
-				index = default
-		return index
+	# # Get the index
+	# def getNetworkTopologyIndex( self, argv ):
+	# 	(min, max) = self.presetTopologies.range()
+	# 	default = self.presetTopologies.defaultIndex
+	# 	index = default
+	# 	if ( parser.validate(argv) ):
+	# 		# If arguments are valid, get the index
+	# 		index = parser.getIndex( argv )
+	# 	else:
+	# 		# If network was not chosen on script start,
+	# 		#   show the list of preset networks, and
+	# 		#   ask to choose one.
+	# 		display.networkSelectionMenu( self.presetTopologies )
+	# 		display.prompt('Input the index (%s to %s) of a network you want to test: ' % (min, max))
+	# 		index = parser.waitForInput()
+	# 		# If input is invalid, then choose the first
+	# 		#   network in the list (starts at index 1).
+	# 		if not ( inRange(index, (min, max)) ) :
+	# 			display.error('Index %s is out of range. Resetting index to default.' % (index))
+	# 			index = default
+	# 	return index
 		
 	
 	# Disable the link between node1 and node2
 	def simulateLinkProblem( self, link ):
 		(name1, name2) = link
 		(node1, node2) = self.getNodes( name1, name2 )
-#		link = self.net.link(node1, node2)#[0] #link.stop()
-#		log.infoln('Link between nodes %s and %s has been disabled' % (link))
-#		return link
+		link = self.net.link(node1, node2)#[0] 
+		link.stop()
+		log.infoln('Link between nodes %s and %s has been disabled' % (link))
+		return link

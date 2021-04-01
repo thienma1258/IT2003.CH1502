@@ -1,21 +1,12 @@
-# -*- coding: utf-8 -*-
-
-#
-#  TestNetEnvCLI.py
-#  Test Network Command Line Interface Extension
-#
-#  Created by mpuchkov on 2019-11-21.
-#  Copyright © 2019 Maxim Puchkov. All rights reserved.
-#
 
 from mininet.cli import CLI
 from mininet.term import makeTerms
 from mininet.util import irange
 
-from TestNet.Logger import log
-from TestNet.Utility import (UITextStyle, display, colorizeEach,
-                             get_routing_decision, get_route_cost)
+from log import log
+from utils import (UITextStyle, display)
 
+from dijkstra import (get_routing_decision, get_route_cost)
 
 # Check if route directly connects two switches
 def isDirect(route):
@@ -41,12 +32,13 @@ def __wait__(*commandList):
 
 
 # Mininet Command Line Interface extension
-class TestNetEnvCLI(CLI):
-    prompt = 'TestNet> '
+class DongPhamTestCli(CLI):
+    prompt = 'dongpham> '
 
     def __init__(self, _mininet, _env):
         self.env = _env
         self.net = _mininet
+        self._testCLI = {}
         CLI.__init__(self, _mininet)
 
     # Tell the controller to do a command

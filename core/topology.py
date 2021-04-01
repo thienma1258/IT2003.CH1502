@@ -1,4 +1,30 @@
 from mininet.topo import Topo
+import __builtin__
+from mininet.util import irange
+
+
+# defined raw link with weight between 2 nodes(2 switches) in production could modify to n different factor but in this case just use weight for dijkstra
+class RawWeightedLink( __builtin__.object ):
+	def __init__( self, nodes, weight ):
+		(self.src, self.dst) = nodes
+		self.nodes = nodes
+		self.weight = weight
+	
+	def nodes( self ):
+		return ( self.src, self.dst )
+	
+	def toString( self ):
+		return '((%s, %s), %s)' % (self.src, self.dst, self.weight)
+
+
+# A weighted link
+def wlink( nodes, weight ):
+	return RawWeightedLink( nodes, weight )
+
+# List of weighted links
+def wlinks( *wlinkList ):
+	return [ wlink(n, w)
+		for (n, w) in wlinkList ]
 
 class SuperTopo( Topo ):
 	displayName = '< Super >'
